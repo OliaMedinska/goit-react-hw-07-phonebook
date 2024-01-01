@@ -1,28 +1,73 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import axios from "axios";
+
+export const fetchContacts = createAsyncThunk('contacts/fetchAll', async () => {
+    const response = await axios.get('https://6591dc248cbbf8afa96c69e2.mockapi.io/contacts/contacts');
+    return response.data;
+});
+
+export const addContact = createAsyncThunk('contacts/addContact', async (contact) => {
+    const response = await axios.post('https://6591dc248cbbf8afa96c69e2.mockapi.io/contacts/contacts', contact);
+    return response.data;
+});
+
+export const deleteContact = createAsyncThunk('contacts/deleteContact', async (contactId) => {
+    await axios.delete(`https://6591dc248cbbf8afa96c69e2.mockapi.io/contacts/contacts/${contactId}`);
+    return contactId;
+});
+
+const pending = (state) => {
+    return {
+        ...state,
+        isLoading: true
+    }
+  };
+
+  const rejected = (state) => {
+    return {
+        ...state,
+        error: true,
+        isLoading: false
+    }
+  };
 
 export const contactsSlice = createSlice({
     name: 'contacts',
     initialState: {
-        item: [
-            { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
-            { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
-            { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
-            { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
-    ],
+    item: [],
     isLoading: false,
     error: null
     },
-    reducers: {
-        addContact: (state, action) => {
-            state.item.push(action.payload);
-        },
-        deleteContact: (state, action) => {
-            const deleteId = action.payload;
-            state.item = state.item.filter(contact => contact.id !== deleteId);
-        }
-    },
+    reducers: {},
+    extraReducers: (builder) => {
+        builder.addCase(fetchContacts.fulfilled, (state, action) => {
+            return {
+                item:action.payload,
+                isLoading:false,
+                error:null
+            }
+          })
+          .addCase(addContact.fulfilled, (state, action) => {
+            return {
+                item: [...state.item, action.payload],
+                isLoading:false,
+                error:null
+            }
+          })
+          .addCase(deleteContact.fulfilled, (state, action) => {
+            return {
+                item: state.item.filter(contact => contact.id !== action.payload),
+                isLoading: false,
+                error: null
+            }
+          })
+          .addCase(fetchContacts.pending, pending)
+          .addCase(addContact.pending, pending)
+          .addCase(deleteContact.pending, pending)
+          .addCase(fetchContacts.rejected, rejected)
+          .addCase(addContact.rejected, rejected)
+          .addCase(deleteContact.rejected, rejected)
+    }
 });
-
-export const {addContact, deleteContact} = contactsSlice.actions;
 
 export default contactsSlice.reducer;

@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import './Contact.css';
 import { useSelector, useDispatch } from 'react-redux';
 import { deleteContact } from './../../redux/contactsSlice';
+import { fetchContacts } from './../../redux/contactsSlice';
 
 export const Contact = () => {
   const contacts = useSelector(state => state.contacts.item);
@@ -13,6 +14,10 @@ export const Contact = () => {
       name.toLowerCase().includes(filter.toLowerCase())
     );
   };
+
+  useEffect(() => {
+    dispatch(fetchContacts());
+  }, [dispatch]);
 
   const deleteContactHandler = id => {
     dispatch(deleteContact(id));
