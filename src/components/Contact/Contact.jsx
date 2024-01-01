@@ -7,6 +7,8 @@ import { fetchContacts } from './../../redux/contactsSlice';
 export const Contact = () => {
   const contacts = useSelector(state => state.contacts.item);
   const filter = useSelector(state => state.filter);
+  const isLoading = useSelector(state => state.contacts.isLoading);
+  const error = useSelector(state => state.contacts.error);
   const dispatch = useDispatch();
 
   const getVisibleContacts = () => {
@@ -27,6 +29,8 @@ export const Contact = () => {
 
   return (
     <>
+      {isLoading && <div>Loading...</div>}
+      {error && <div>Something went wrong...</div>}
       {filteredContacts.length !== 0 ? (
         <ul>
           {filteredContacts.map(contact => {
